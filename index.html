@@ -947,7 +947,7 @@ function sauvegarderTransaction() {
 }
 
 // ══════════════════════════════════════════
-// SUPPRESSION
+// SUPPRESSION 
 // ══════════════════════════════════════════
 function confirmerSuppressionTx(tid) {
   const tx = transactions.find(t => t.id === tid);
@@ -957,7 +957,7 @@ function confirmerSuppressionTx(tid) {
   confirmCallback = () => {
     transactions = transactions.filter(t => t.id !== tid);
     sauver();
-    renderDetail();
+    setTimeout(() => renderDetail(), 50);
     showToast('Transaction supprimée');
   };
   document.getElementById('confirmOverlay').classList.add('open');
