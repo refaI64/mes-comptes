@@ -992,6 +992,10 @@ document.getElementById('confirmOk').onclick = () => {
 // INIT
 // ══════════════════════════════════════════
 renderListe();
+  // Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/mes-comptes/sw.js');
+}
 </script>
 </body>
 </html>
