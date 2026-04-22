@@ -1,0 +1,22 @@
+{
+  "name": "Mes Comptes",
+  "short_name": "Mes Comptes",
+  "description": "Gestion personnelle crédit et débit",
+  "start_url": "/mes-comptes/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#1a1a2e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/6c63ff/ffffff?text=MC",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/6c63ff/ffffff?text=MC",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
