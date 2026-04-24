@@ -1,1001 +1,336 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1a1a2e">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Gestion personnelle crédit et débit">
-<title>Mes Comptes</title>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0f0f1a;
-    --surface: #1a1a2e;
-    --surface2: #22223b;
-    --surface3: #2d2d44;
-    --accent-green: #00e5a0;
-    --accent-red: #ff4d6d;
-    --accent-blue: #6c63ff;
-    --text: #f0f0f5;
-    --text-muted: #8888aa;
-    --border: rgba(255,255,255,0.07);
-    --radius: 16px;
-    --radius-sm: 10px;
-    --shadow: 0 8px 32px rgba(0,0,0,0.4);
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Mes Comptes</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0f0f1a;
+            --surface: #1a1a2e;
+            --surface2: #22223b;
+            --surface3: #2d2d44;
+            --accent-green: #00e5a0;
+            --accent-red: #ff4d6d;
+            --accent-blue: #6c63ff;
+            --text: #f0f0f5;
+            --text-muted: #8888aa;
+            --border: rgba(255,255,255,0.07);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    overflow-x: hidden;
-    position: relative;
-  }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px; left: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
+        /* Header & Bilan */
+        .header { position: sticky; top: 0; z-index: 100; background: rgba(15,15,26,0.92); backdrop-filter: blur(20px); padding: 16px 20px; border-bottom: 1px solid var(--border); }
+        .header-top { display: flex; align-items: center; justify-content: space-between; }
+        .app-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; }
+        
+        .bilan-card { margin: 16px; padding: 20px; background: linear-gradient(135deg, #1e1e35 0%, #252540 100%); border-radius: var(--radius); border: 1px solid var(--border); }
+        .bilan-net { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; margin: 5px 0 15px; }
+        .bilan-net.positif { color: var(--accent-green); }
+        .bilan-net.negatif { color: var(--accent-red); }
+        
+        .bilan-row { display: flex; gap: 10px; }
+        .bilan-item { flex: 1; }
+        .bilan-item-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .bilan-item-val { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
 
-  /* ── HEADER ── */
-  .header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(15,15,26,0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 16px 20px 12px;
-    border-bottom: 1px solid var(--border);
-  }
+        /* Tabs & Liste */
+        .tabs { display: flex; margin: 0 16px 10px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; }
+        .tab { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; border-radius: 7px; }
+        .tab.active { background: var(--surface3); color: var(--text); font-weight: 600; }
 
-  .header-top { display: flex; align-items: center; justify-content: space-between; }
+        .personne-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin: 0 16px 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+        .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; }
+        .avatar.green { background: rgba(0,229,160,0.1); color: var(--accent-green); }
+        .avatar.red { background: rgba(255,77,109,0.1); color: var(--accent-red); }
+        .personne-info { flex: 1; }
+        .personne-solde { text-align: right; font-family: 'Syne', sans-serif; font-weight: 700; }
 
-  .app-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #fff 30%, var(--accent-blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+        /* Modals & Forms */
+        .overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; }
+        .overlay.open { display: flex; }
+        .modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 20px; width: 100%; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+        .form-input, .form-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; color: #fff; font-family: inherit; }
+        
+        .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .type-btn { padding: 12px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: transparent; color: var(--text-muted); font-weight: 700; cursor: pointer; }
+        .type-btn.active-green { border-color: var(--accent-green); color: var(--accent-green); background: rgba(0,229,160,0.05); }
+        .type-btn.active-red { border-color: var(--accent-red); color: var(--accent-red); background: rgba(255,77,109,0.05); }
 
-  .btn-add-top {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: var(--accent-blue);
-    border: none; color: white;
-    font-size: 22px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 16px rgba(108,99,255,0.4);
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .btn-add-top:active { transform: scale(0.92); }
+        .btn-primary { width: 100%; padding: 15px; border-radius: var(--radius-sm); border: none; background: var(--accent-blue); color: white; font-weight: 700; cursor: pointer; }
+        .btn-add-top { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-blue); border: none; color: white; font-size: 20px; }
 
-  /* ── BILAN GLOBAL ── */
-  .bilan-card {
-    margin: 16px;
-    padding: 20px;
-    background: linear-gradient(135deg, #1e1e35 0%, #252540 100%);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  .bilan-card::after {
-    content: '';
-    position: absolute;
-    top: -30px; right: -30px;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: rgba(108,99,255,0.1);
-  }
+        /* Detail Page */
+        .page-detail { position: fixed; inset: 0; z-index: 150; background: var(--bg); display: none; flex-direction: column; }
+        .page-detail.open { display: flex; overflow-y: auto; }
+        .tx-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); }
+        .tx-del-btn { background: none; border: none; color: var(--accent-red); padding: 5px; cursor: pointer; font-size: 16px; opacity: 0.6; }
+        .tx-info { flex: 1; cursor: pointer; }
+        .tx-note { font-weight: 500; font-size: 14px; }
+        .tx-date { font-size: 11px; color: var(--text-muted); }
+        .tx-montant { font-family: 'Syne', sans-serif; font-weight: 700; margin-right: 15px; }
 
-  .bilan-label {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-
-  .bilan-net {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 14px;
-  }
-  .bilan-net.positif { color: var(--accent-green); }
-  .bilan-net.negatif { color: var(--accent-red); }
-  .bilan-net.neutre  { color: var(--text-muted); }
-
-  .bilan-row { display: flex; gap: 16px; }
-  .bilan-item { flex: 1; }
-  .bilan-item-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-  .bilan-item-val { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
-  .bilan-item-val.green { color: var(--accent-green); }
-  .bilan-item-val.red   { color: var(--accent-red); }
-
-  /* ── TABS ── */
-  .tabs {
-    display: flex;
-    margin: 0 16px 8px;
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 4px;
-    gap: 4px;
-  }
-  .tab {
-    flex: 1; padding: 8px;
-    border: none; background: transparent;
-    color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px; font-weight: 500;
-    border-radius: 7px; cursor: pointer;
-    transition: all 0.2s;
-  }
-  .tab.active {
-    background: var(--surface3);
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  /* ── LISTE PERSONNES ── */
-  .liste { padding: 0 16px 100px; }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-  }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-title { font-family: 'Syne', sans-serif; font-size: 18px; color: var(--text); margin-bottom: 6px; }
-  .empty-sub { font-size: 14px; }
-
-  .personne-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: transform 0.15s, background 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    animation: slideIn 0.3s ease;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .personne-card:active { transform: scale(0.98); background: var(--surface2); }
-
-  .avatar {
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif;
-    font-size: 18px; font-weight: 800;
-    flex-shrink: 0;
-  }
-  .avatar.green { background: rgba(0,229,160,0.15); color: var(--accent-green); }
-  .avatar.red   { background: rgba(255,77,109,0.15); color: var(--accent-red); }
-  .avatar.grey  { background: var(--surface2); color: var(--text-muted); }
-
-  .personne-info { flex: 1; min-width: 0; }
-  .personne-nom {
-    font-family: 'Syne', sans-serif;
-    font-size: 15px; font-weight: 700;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .personne-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-  .personne-solde {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px; font-weight: 700;
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .personne-solde.green { color: var(--accent-green); }
-  .personne-solde.red   { color: var(--accent-red); }
-  .personne-solde.grey  { color: var(--text-muted); }
-
-  .solde-label { font-size: 10px; font-weight: 400; display: block; margin-top: 2px; }
-
-  /* ── MODALS ── */
-  .overlay {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .overlay.open { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border-radius: 24px 24px 0 0;
-    padding: 24px 20px 40px;
-    width: 100%;
-    max-width: 480px;
-    border-top: 1px solid var(--border);
-    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-
-  .modal-handle {
-    width: 40px; height: 4px;
-    background: var(--surface3);
-    border-radius: 2px;
-    margin: 0 auto 20px;
-  }
-
-  .modal-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px; font-weight: 800;
-    margin-bottom: 20px;
-  }
-
-  .form-group { margin-bottom: 14px; }
-  .form-label {
-    display: block;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
-  .form-input, .form-select, .form-textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--accent-blue);
-  }
-  .form-select option { background: var(--surface2); }
-  .form-textarea { resize: none; height: 72px; }
-
-  .type-toggle {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .type-btn {
-    padding: 12px;
-    border-radius: var(--radius-sm);
-    border: 2px solid var(--border);
-    background: transparent;
-    color: var(--text-muted);
-    font-family: 'Syne', sans-serif;
-    font-size: 14px; font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .type-btn.active-green {
-    border-color: var(--accent-green);
-    background: rgba(0,229,160,0.1);
-    color: var(--accent-green);
-  }
-  .type-btn.active-red {
-    border-color: var(--accent-red);
-    background: rgba(255,77,109,0.1);
-    color: var(--accent-red);
-  }
-
-  .btn-primary {
-    width: 100%;
-    padding: 15px;
-    border-radius: var(--radius-sm);
-    border: none;
-    background: var(--accent-blue);
-    color: white;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px; font-weight: 700;
-    cursor: pointer;
-    margin-top: 8px;
-    box-shadow: 0 4px 20px rgba(108,99,255,0.3);
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .btn-primary:active { transform: scale(0.98); box-shadow: 0 2px 10px rgba(108,99,255,0.2); }
-
-  .btn-danger {
-    width: 100%;
-    padding: 13px;
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(255,77,109,0.3);
-    background: rgba(255,77,109,0.08);
-    color: var(--accent-red);
-    font-family: 'Syne', sans-serif;
-    font-size: 14px; font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.2s;
-  }
-  .btn-danger:active { background: rgba(255,77,109,0.15); }
-
-  /* ── PAGE DETAIL ── */
-  .page-detail {
-    position: fixed; inset: 0; z-index: 150;
-    background: var(--bg);
-    display: none;
-    flex-direction: column;
-    max-width: 480px;
-    margin: 0 auto;
-    overflow-y: auto;
-  }
-  .page-detail.open { display: flex; }
-
-  .detail-header {
-    position: sticky; top: 0;
-    background: rgba(15,15,26,0.95);
-    backdrop-filter: blur(20px);
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 14px;
-    z-index: 10;
-  }
-
-  .btn-back {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: none; color: var(--text);
-    font-size: 18px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .detail-nom {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px; font-weight: 800;
-    flex: 1;
-  }
-
-  .detail-bilan {
-    margin: 16px;
-    padding: 20px;
-    border-radius: var(--radius);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .detail-bilan.green { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2); }
-  .detail-bilan.red   { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); }
-  .detail-bilan.grey  { background: var(--surface); border: 1px solid var(--border); }
-
-  .detail-bilan-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 1px; }
-  .detail-bilan-montant {
-    font-family: 'Syne', sans-serif;
-    font-size: 36px; font-weight: 800;
-    margin-bottom: 4px;
-  }
-  .detail-bilan-montant.green { color: var(--accent-green); }
-  .detail-bilan-montant.red   { color: var(--accent-red); }
-  .detail-bilan-montant.grey  { color: var(--text-muted); }
-  .detail-bilan-statut { font-size: 13px; color: var(--text-muted); }
-
-  .detail-actions {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin: 0 16px 16px;
-  }
-  .action-btn {
-    padding: 12px;
-    border-radius: var(--radius-sm);
-    border: none; cursor: pointer;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: transform 0.15s;
-  }
-  .action-btn:active { transform: scale(0.96); }
-  .action-btn.green { background: rgba(0,229,160,0.12); color: var(--accent-green); border: 1px solid rgba(0,229,160,0.2); }
-  .action-btn.red   { background: rgba(255,77,109,0.12); color: var(--accent-red);   border: 1px solid rgba(255,77,109,0.2); }
-
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px; font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 0 16px 10px;
-  }
-
-  .tx-list { padding: 0 16px 100px; }
-
-  .tx-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-    animation: slideIn 0.25s ease;
-  }
-  .tx-item:last-child { border-bottom: none; }
-
-  .tx-icon {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
-  }
-  .tx-icon.green { background: rgba(0,229,160,0.12); }
-  .tx-icon.red   { background: rgba(255,77,109,0.12); }
-
-  .tx-info { flex: 1; min-width: 0; }
-  .tx-note { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tx-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-  .tx-right { text-align: right; flex-shrink: 0; }
-  .tx-montant { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
-  .tx-montant.green { color: var(--accent-green); }
-  .tx-montant.red   { color: var(--accent-red); }
-  .tx-solde-apres { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-
-  .tx-del-btn {
-    background: none; border: none;
-    color: var(--text-muted); font-size: 16px;
-    cursor: pointer; padding: 4px 6px;
-    border-radius: 6px;
-    transition: color 0.2s, background 0.2s;
-  }
-  .tx-del-btn:active { color: var(--accent-red); background: rgba(255,77,109,0.1); }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--surface3);
-    color: var(--text);
-    padding: 12px 20px;
-    border-radius: 40px;
-    font-size: 14px; font-weight: 500;
-    z-index: 500;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    white-space: nowrap;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ── CONFIRM DIALOG ── */
-  .confirm-overlay {
-    position: fixed; inset: 0; z-index: 300;
-    background: rgba(0,0,0,0.75);
-    display: none; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .confirm-overlay.open { display: flex; }
-  .confirm-box {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 24px;
-    width: 100%; max-width: 320px;
-    border: 1px solid var(--border);
-    animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  @keyframes popIn {
-    from { opacity: 0; transform: scale(0.85); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  .confirm-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 8px; }
-  .confirm-msg { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
-  .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .confirm-btn {
-    padding: 12px;
-    border-radius: var(--radius-sm);
-    border: none; cursor: pointer;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px; font-weight: 700;
-  }
-  .confirm-btn.cancel { background: var(--surface2); color: var(--text-muted); }
-  .confirm-btn.ok { background: var(--accent-red); color: white; }
-
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 0; }
-</style>
+        .btn-danger { width: 90%; margin: 20px auto; padding: 12px; background: rgba(255,77,109,0.1); color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: var(--radius-sm); }
+    </style>
 </head>
 <body>
 
-<!-- ══ PAGE PRINCIPALE ══ -->
 <div id="pageMain">
-
-  <div class="header">
-    <div class="header-top">
-      <span class="app-title">💰 Mes Comptes</span>
-      <button class="btn-add-top" onclick="openModalPersonne()">＋</button>
+    <div class="header">
+        <div class="header-top">
+            <span class="app-title">💰 Mes Comptes</span>
+            <button class="btn-add-top" onclick="openModalPersonne()">＋</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Bilan global -->
-  <div class="bilan-card">
-    <div class="bilan-label">Bilan Net</div>
-    <div class="bilan-net" id="bilanNet">0,00 DH</div>
-    <div class="bilan-row">
-      <div class="bilan-item">
-        <div class="bilan-item-label">On me doit</div>
-        <div class="bilan-item-val green" id="totalCredit">0,00 DH</div>
-      </div>
-      <div class="bilan-item">
-        <div class="bilan-item-label">Je dois</div>
-        <div class="bilan-item-val red" id="totalDebit">0,00 DH</div>
-      </div>
-      <div class="bilan-item">
-        <div class="bilan-item-label">Personnes</div>
-        <div class="bilan-item-val" id="totalPersonnes">0</div>
-      </div>
+    <div class="bilan-card">
+        <div class="bilan-item-label">Bilan Global</div>
+        <div class="bilan-net" id="bilanNet">0,00 DH</div>
+        <div class="bilan-row">
+            <div class="bilan-item">
+                <div class="bilan-item-label">On me doit</div>
+                <div class="bilan-item-val" style="color:var(--accent-green)" id="totalCredit">0,00 DH</div>
+            </div>
+            <div class="bilan-item">
+                <div class="bilan-item-label">Je dois</div>
+                <div class="bilan-item-val" style="color:var(--accent-red)" id="totalDebit">0,00 DH</div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="setTab('tous')" id="tabTous">Tous</button>
-    <button class="tab" onclick="setTab('credit')" id="tabCredit">Me doivent 🟢</button>
-    <button class="tab" onclick="setTab('debit')"  id="tabDebit">Je dois 🔴</button>
-  </div>
+    <div class="tabs">
+        <button class="tab active" onclick="setTab('tous')" id="tabTous">Tous</button>
+        <button class="tab" onclick="setTab('credit')" id="tabCredit">Crédit</button>
+        <button class="tab" onclick="setTab('debit')" id="tabDebit">Débit</button>
+    </div>
 
-  <!-- Liste -->
-  <div class="liste" id="listePersonnes"></div>
+    <div id="listePersonnes"></div>
 </div>
 
-<!-- ══ PAGE DETAIL ══ -->
 <div class="page-detail" id="pageDetail">
-  <div class="detail-header">
-    <button class="btn-back" onclick="fermerDetail()">←</button>
-    <div class="detail-nom" id="detailNom">—</div>
-    <button class="btn-add-top" onclick="openModalTransaction()" style="background:var(--surface2);box-shadow:none;">＋</button>
-  </div>
+    <div class="header">
+        <div class="header-top">
+            <button onclick="fermerDetail()" style="background:none; border:none; color:white; font-size:20px;">←</button>
+            <span class="app-title" id="detailNom">Nom</span>
+            <button class="btn-add-top" onclick="openModalTransaction()">＋</button>
+        </div>
+    </div>
+    
+    <div style="text-align:center; padding: 20px;">
+        <div class="bilan-item-label">Solde avec cette personne</div>
+        <div class="bilan-net" id="detailMontant">0,00 DH</div>
+    </div>
 
-  <div class="detail-bilan grey" id="detailBilan">
-    <div class="detail-bilan-label">SOLDE ACTUEL</div>
-    <div class="detail-bilan-montant grey" id="detailMontant">0,00 DH</div>
-    <div class="detail-bilan-statut" id="detailStatut">En équilibre</div>
-  </div>
-
-  <div class="detail-actions">
-    <button class="action-btn green" onclick="openModalTransactionType('CREDIT')">📥 Il me rend</button>
-    <button class="action-btn red"   onclick="openModalTransactionType('DEBIT')">📤 Je prête / je dois</button>
-  </div>
-
-  <div class="section-title">Historique</div>
-  <div class="tx-list" id="txList"></div>
-
-  <div style="padding: 0 16px 16px;">
-    <button class="btn-danger" onclick="confirmerSuppressionPersonne()">🗑 Supprimer cette personne</button>
-  </div>
+    <div id="txList"></div>
+    <button class="btn-danger" onclick="supprimerPersonne()">Supprimer cette personne</button>
 </div>
 
-<!-- ══ MODAL : Ajouter personne ══ -->
-<div class="overlay" id="overlayPersonne" onclick="closeOverlayPersonne(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modalPersonneTitre">Nouvelle personne</div>
-
-    <div class="form-group">
-      <label class="form-label">Nom / Prénom</label>
-      <input class="form-input" id="inputNom" placeholder="ex : Ali, Maman, Sara..." maxlength="40">
+<div class="overlay" id="overlayTransaction" onclick="if(event.target==this) closeModals()">
+    <div class="modal">
+        <div class="form-group">
+            <label class="form-label">Type d'opération</label>
+            <div class="type-toggle">
+                <button class="type-btn" id="btnCredit" onclick="setType('CREDIT')">On me doit</button>
+                <button class="type-btn" id="btnDebit" onclick="setType('DEBIT')">Je dois</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Montant (DH)</label>
+            <input type="number" class="form-input" id="inputMontant" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Note / Raison</label>
+            <input type="text" class="form-input" id="inputNote" placeholder="Ex: Déjeuner, Prêt...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="inputDate">
+        </div>
+        <button class="btn-primary" onclick="sauvegarderTransaction()">Enregistrer</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Téléphone (optionnel)</label>
-      <input class="form-input" id="inputTel" placeholder="06XXXXXXXX" type="tel" maxlength="15">
-    </div>
-
-    <button class="btn-primary" onclick="sauvegarderPersonne()">Enregistrer</button>
-  </div>
 </div>
 
-<!-- ══ MODAL : Ajouter transaction ══ -->
-<div class="overlay" id="overlayTransaction" onclick="closeOverlayTransaction(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nouvelle transaction</div>
-
-    <div class="form-group">
-      <label class="form-label">Type</label>
-      <div class="type-toggle">
-        <button class="type-btn active-green" id="btnCredit" onclick="setType('CREDIT')">📥 On me doit</button>
-        <button class="type-btn" id="btnDebit"  onclick="setType('DEBIT')">📤 Je dois</button>
-      </div>
+<div class="overlay" id="overlayPersonne" onclick="if(event.target==this) closeModals()">
+    <div class="modal">
+        <div class="form-group">
+            <label class="form-label">Nom de la personne</label>
+            <input type="text" class="form-input" id="inputNom" placeholder="Nom">
+        </div>
+        <button class="btn-primary" onclick="sauvegarderPersonne()">Ajouter</button>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Montant (DH)</label>
-      <input class="form-input" id="inputMontant" placeholder="0,00" type="number" min="0" step="0.01">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Note (optionnel)</label>
-      <textarea class="form-textarea" id="inputNote" placeholder="ex : Remboursement resto, prêt téléphone..."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Date</label>
-      <input class="form-input" id="inputDate" type="date">
-    </div>
-
-    <button class="btn-primary" onclick="sauvegarderTransaction()">Enregistrer</button>
-  </div>
 </div>
-
-<!-- ══ CONFIRM ══ -->
-<div class="confirm-overlay" id="confirmOverlay">
-  <div class="confirm-box">
-    <div class="confirm-title" id="confirmTitle">Confirmer</div>
-    <div class="confirm-msg" id="confirmMsg">Êtes-vous sûr ?</div>
-    <div class="confirm-btns">
-      <button class="confirm-btn cancel" onclick="fermerConfirm()">Annuler</button>
-      <button class="confirm-btn ok" id="confirmOk">Supprimer</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-// DONNÉES & STORAGE
-// ══════════════════════════════════════════
-const KEY_PERSONNES = 'mc_personnes';
-const KEY_TRANSACTIONS = 'mc_transactions';
+    let personnes = JSON.parse(localStorage.getItem('mc_personnes') || '[]');
+    let transactions = JSON.parse(localStorage.getItem('mc_transactions') || '[]');
+    let personneActive = null;
+    let typeActif = 'CREDIT';
+    let tabActif = 'tous';
+    let editTxId = null; // Pour savoir si on modifie une transaction
 
-let personnes = JSON.parse(localStorage.getItem(KEY_PERSONNES) || '[]');
-let transactions = JSON.parse(localStorage.getItem(KEY_TRANSACTIONS) || '[]');
-let tabActif = 'tous';
-let personneActive = null;
-let typeActif = 'CREDIT';
-let confirmCallback = null;
+    function sauver() {
+        localStorage.setItem('mc_personnes', JSON.stringify(personnes));
+        localStorage.setItem('mc_transactions', JSON.stringify(transactions));
+    }
 
-function sauver() {
-  localStorage.setItem(KEY_PERSONNES, JSON.stringify(personnes));
-  localStorage.setItem(KEY_TRANSACTIONS, JSON.stringify(transactions));
-}
+    function formatDH(n) { return n.toLocaleString('fr-MA', { minimumFractionDigits: 2 }) + ' DH'; }
 
-// ══════════════════════════════════════════
-// UTILITAIRES
-// ══════════════════════════════════════════
-function formatDH(n) {
-  return n.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' DH';
-}
+    function renderListe() {
+        const liste = document.getElementById('listePersonnes');
+        let totalC = 0, totalD = 0;
 
-function formatDate(str) {
-  if (!str) return '';
-  const d = new Date(str);
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+        liste.innerHTML = personnes.map(p => {
+            const txs = transactions.filter(t => t.pid === p.id);
+            const solde = txs.reduce((acc, t) => acc + (t.type === 'CREDIT' ? t.montant : -t.montant), 0);
+            
+            if (solde > 0) totalC += solde; else totalD += Math.abs(solde);
+            
+            // Filtre des onglets
+            if (tabActif === 'credit' && solde <= 0) return '';
+            if (tabActif === 'debit' && solde >= 0) return '';
 
-function initiale(nom) {
-  return (nom || '?').trim().charAt(0).toUpperCase();
-}
+            const cls = solde >= 0 ? 'green' : 'red';
+            return `
+                <div class="personne-card" onclick="ouvrirDetail('${p.id}')">
+                    <div class="avatar ${cls}">${p.nom[0].toUpperCase()}</div>
+                    <div class="personne-info"><strong>${p.nom}</strong></div>
+                    <div class="personne-solde" style="color:var(--accent-${cls})">${formatDH(Math.abs(solde))}</div>
+                </div>`;
+        }).join('');
 
-function soldePersonne(pid) {
-  let s = 0;
-  transactions.filter(t => t.pid === pid).forEach(t => {
-    s += t.type === 'CREDIT' ? t.montant : -t.montant;
-  });
-  return s;
-}
+        document.getElementById('bilanNet').textContent = formatDH(totalC - totalD);
+        document.getElementById('totalCredit').textContent = formatDH(totalC);
+        document.getElementById('totalDebit').textContent = formatDH(totalD);
+    }
 
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
-}
+    function setTab(t) {
+        tabActif = t;
+        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
+        renderListe();
+    }
 
-// ══════════════════════════════════════════
-// RENDU LISTE PRINCIPALE
-// ══════════════════════════════════════════
-function renderListe() {
-  let totalC = 0, totalD = 0;
-  const liste = document.getElementById('listePersonnes');
+    // GESTION PERSONNES
+    function openModalPersonne() { document.getElementById('overlayPersonne').classList.add('open'); }
+    function sauvegarderPersonne() {
+        const nom = document.getElementById('inputNom').value.trim();
+        if(!nom) return;
+        personnes.push({ id: Date.now().toString(), nom });
+        sauver(); closeModals(); renderListe();
+    }
+    function supprimerPersonne() {
+        if(confirm("Supprimer cette personne et tout son historique ?")) {
+            transactions = transactions.filter(t => t.pid !== personneActive.id);
+            personnes = personnes.filter(p => p.id !== personneActive.id);
+            sauver(); fermerDetail();
+        }
+    }
 
-  let filtered = personnes.filter(p => {
-    const s = soldePersonne(p.id);
-    if (tabActif === 'credit') return s > 0;
-    if (tabActif === 'debit')  return s < 0;
-    return true;
-  });
+    // GESTION DÉTAILS & TRANSACTIONS
+    function ouvrirDetail(id) {
+        personneActive = personnes.find(p => p.id === id);
+        document.getElementById('pageDetail').classList.add('open');
+        renderDetail();
+    }
+    function fermerDetail() { document.getElementById('pageDetail').classList.remove('open'); renderListe(); }
 
-  personnes.forEach(p => {
-    const s = soldePersonne(p.id);
-    if (s > 0) totalC += s;
-    if (s < 0) totalD += Math.abs(s);
-  });
+    function renderDetail() {
+        document.getElementById('detailNom').textContent = personneActive.nom;
+        const txs = transactions.filter(t => t.pid === personneActive.id).sort((a,b) => new Date(b.date) - new Date(a.date));
+        const solde = txs.reduce((acc, t) => acc + (t.type === 'CREDIT' ? t.montant : -t.montant), 0);
+        
+        document.getElementById('detailMontant').textContent = formatDH(Math.abs(solde));
+        document.getElementById('detailMontant').style.color = solde >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 
-  const net = totalC - totalD;
-  const bilanEl = document.getElementById('bilanNet');
-  bilanEl.textContent = formatDH(Math.abs(net));
-  bilanEl.className = 'bilan-net ' + (net > 0 ? 'positif' : net < 0 ? 'negatif' : 'neutre');
-  document.getElementById('totalCredit').textContent = formatDH(totalC);
-  document.getElementById('totalDebit').textContent  = formatDH(totalD);
-  document.getElementById('totalPersonnes').textContent = personnes.length;
+        document.getElementById('txList').innerHTML = txs.map(t => `
+            <div class="tx-item">
+                <div class="tx-info" onclick="editerTx('${t.id}')">
+                    <div class="tx-note">${t.note || 'Opération'}</div>
+                    <div class="tx-date">${t.date}</div>
+                </div>
+                <div class="tx-montant ${t.type === 'CREDIT' ? 'green' : 'red'}" style="color:var(--accent-${t.type === 'CREDIT' ? 'green' : 'red'})">
+                    ${t.type === 'CREDIT' ? '+' : '-'}${t.montant}
+                </div>
+                <button class="tx-del-btn" onclick="supprimerTx('${t.id}')">🗑</button>
+            </div>`).join('');
+    }
 
-  if (filtered.length === 0) {
-    liste.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">📒</div>
-      <div class="empty-title">Aucune personne</div>
-      <div class="empty-sub">Appuie sur ＋ pour ajouter quelqu'un</div>
-    </div>`;
-    return;
-  }
+    function setType(t) {
+        typeActif = t;
+        document.getElementById('btnCredit').className = 'type-btn' + (t === 'CREDIT' ? ' active-green' : '');
+        document.getElementById('btnDebit').className = 'type-btn' + (t === 'DEBIT' ? ' active-red' : '');
+    }
 
-  // Tri : d'abord les plus grands soldes absolus
-  filtered.sort((a, b) => Math.abs(soldePersonne(b.id)) - Math.abs(soldePersonne(a.id)));
+    function openModalTransaction() {
+        editTxId = null;
+        document.getElementById('inputMontant').value = '';
+        document.getElementById('inputNote').value = '';
+        document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+        setType('CREDIT');
+        document.getElementById('overlayTransaction').classList.add('open');
+    }
 
-  liste.innerHTML = filtered.map(p => {
-    const s = soldePersonne(p.id);
-    const cls = s > 0 ? 'green' : s < 0 ? 'red' : 'grey';
-    const nbTx = transactions.filter(t => t.pid === p.id).length;
-    const label = s > 0 ? 'me doit' : s < 0 ? 'je dois' : 'soldé';
-    const montantAff = s === 0 ? '—' : formatDH(Math.abs(s));
-    return `<div class="personne-card" onclick="ouvrirDetail('${p.id}')">
-      <div class="avatar ${cls}">${initiale(p.nom)}</div>
-      <div class="personne-info">
-        <div class="personne-nom">${p.nom}</div>
-        <div class="personne-sub">${p.tel || ''} · ${nbTx} transaction${nbTx !== 1 ? 's' : ''}</div>
-      </div>
-      <div class="personne-solde ${cls}">
-        ${montantAff}
-        <span class="solde-label">${label}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
+    function editerTx(id) {
+        const t = transactions.find(tx => tx.id === id);
+        editTxId = id;
+        document.getElementById('inputMontant').value = t.montant;
+        document.getElementById('inputNote').value = t.note;
+        document.getElementById('inputDate').value = t.date;
+        setType(t.type);
+        document.getElementById('overlayTransaction').classList.add('open');
+    }
 
-function setTab(t) {
-  tabActif = t;
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
-  renderListe();
-}
+    function sauvegarderTransaction() {
+        const montant = parseFloat(document.getElementById('inputMontant').value);
+        const note = document.getElementById('inputNote').value;
+        const date = document.getElementById('inputDate').value;
+        if(!montant) return;
 
-// ══════════════════════════════════════════
-// MODAL PERSONNE
-// ══════════════════════════════════════════
-function openModalPersonne() {
-  document.getElementById('inputNom').value = '';
-  document.getElementById('inputTel').value = '';
-  document.getElementById('modalPersonneTitre').textContent = 'Nouvelle personne';
-  document.getElementById('overlayPersonne').classList.add('open');
-  setTimeout(() => document.getElementById('inputNom').focus(), 300);
-}
+        if(editTxId) {
+            const index = transactions.findIndex(t => t.id === editTxId);
+            transactions[index] = { ...transactions[index], montant, note, date, type: typeActif };
+        } else {
+            transactions.push({ id: Date.now().toString(), pid: personneActive.id, montant, note, date, type: typeActif });
+        }
+        
+        sauver(); closeModals(); renderDetail();
+    }
 
-function closeOverlayPersonne(e) {
-  if (e.target === document.getElementById('overlayPersonne'))
-    document.getElementById('overlayPersonne').classList.remove('open');
-}
+    function supprimerTx(id) {
+        if(confirm("Supprimer cette opération ?")) {
+            transactions = transactions.filter(t => t.id !== id);
+            sauver(); renderDetail();
+        }
+    }
 
-function sauvegarderPersonne() {
-  const nom = document.getElementById('inputNom').value.trim();
-  if (!nom) { showToast('⚠️ Entrez un nom'); return; }
+    function closeModals() {
+        document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+    }
 
-  const p = {
-    id: Date.now().toString(),
-    nom,
-    tel: document.getElementById('inputTel').value.trim(),
-    cree: new Date().toISOString()
-  };
-  personnes.push(p);
-  sauver();
-  document.getElementById('overlayPersonne').classList.remove('open');
-  renderListe();
-  showToast('✅ ' + nom + ' ajouté(e)');
-}
-
-// ══════════════════════════════════════════
-// PAGE DETAIL
-// ══════════════════════════════════════════
-function ouvrirDetail(pid) {
-  personneActive = personnes.find(p => p.id === pid);
-  if (!personneActive) return;
-  document.getElementById('pageDetail').classList.add('open');
-  renderDetail();
-}
-
-function fermerDetail() {
-  document.getElementById('pageDetail').classList.remove('open');
-  personneActive = null;
-  renderListe();
-}
-
-function renderDetail() {
-  if (!personneActive) return;
-  const p = personneActive;
-  const s = soldePersonne(p.id);
-  document.getElementById('detailNom').textContent = p.nom;
-
-  const bilanEl   = document.getElementById('detailBilan');
-  const montantEl = document.getElementById('detailMontant');
-  const statutEl  = document.getElementById('detailStatut');
-
-  montantEl.textContent = s === 0 ? '0,00 DH' : formatDH(Math.abs(s));
-
-  if (s > 0) {
-    bilanEl.className = 'detail-bilan green';
-    montantEl.className = 'detail-bilan-montant green';
-    statutEl.textContent = p.nom + ' me doit';
-  } else if (s < 0) {
-    bilanEl.className = 'detail-bilan red';
-    montantEl.className = 'detail-bilan-montant red';
-    statutEl.textContent = 'Je dois à ' + p.nom;
-  } else {
-    bilanEl.className = 'detail-bilan grey';
-    montantEl.className = 'detail-bilan-montant grey';
-    statutEl.textContent = 'Compte soldé ✓';
-  }
-
-  // Historique
-  const txs = transactions.filter(t => t.pid === p.id)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const txList = document.getElementById('txList');
-  if (txs.length === 0) {
-    txList.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text-muted)">
-      Aucune transaction<br><small>Appuie sur ＋ pour ajouter</small>
-    </div>`;
-    return;
-  }
-
-  // Calcul solde progressif (du plus ancien au plus récent)
-  const txTri = [...txs].reverse();
-  let running = 0;
-  const soldes = {};
-  txTri.forEach(t => {
-    running += t.type === 'CREDIT' ? t.montant : -t.montant;
-    soldes[t.id] = running;
-  });
-
-  txList.innerHTML = txs.map(t => {
-    const cls = t.type === 'CREDIT' ? 'green' : 'red';
-    const icon = t.type === 'CREDIT' ? '📥' : '📤';
-    const sign = t.type === 'CREDIT' ? '+' : '-';
-    const sd = soldes[t.id];
-    const sdLabel = sd > 0 ? `Solde : ${formatDH(sd)} à recevoir` : sd < 0 ? `Solde : ${formatDH(Math.abs(sd))} à payer` : 'Soldé';
-    return `<div class="tx-item">
-      <div class="tx-icon ${cls}">${icon}</div>
-      <div class="tx-info">
-        <div class="tx-note">${t.note || (t.type === 'CREDIT' ? 'Prêt / à recevoir' : 'Dette / à payer')}</div>
-        <div class="tx-date">${formatDate(t.date)}</div>
-      </div>
-      <div class="tx-right">
-        <div class="tx-montant ${cls}">${sign}${formatDH(t.montant)}</div>
-        <div class="tx-solde-apres">${sdLabel}</div>
-      </div>
-      <button class="tx-del-btn" onclick="confirmerSuppressionTx('${t.id}')">✕</button>
-    </div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════
-// MODAL TRANSACTION
-// ══════════════════════════════════════════
-function openModalTransaction() {
-  typeActif = 'CREDIT';
-  majBoutonType();
-  document.getElementById('inputMontant').value = '';
-  document.getElementById('inputNote').value = '';
-  document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('overlayTransaction').classList.add('open');
-  setTimeout(() => document.getElementById('inputMontant').focus(), 300);
-}
-
-function openModalTransactionType(type) {
-  openModalTransaction();
-  setType(type);
-}
-
-function closeOverlayTransaction(e) {
-  if (e.target === document.getElementById('overlayTransaction'))
-    document.getElementById('overlayTransaction').classList.remove('open');
-}
-
-function setType(t) {
-  typeActif = t;
-  majBoutonType();
-}
-
-function majBoutonType() {
-  document.getElementById('btnCredit').className = 'type-btn' + (typeActif === 'CREDIT' ? ' active-green' : '');
-  document.getElementById('btnDebit').className  = 'type-btn' + (typeActif === 'DEBIT'  ? ' active-red'  : '');
-}
-
-function sauvegarderTransaction() {
-  const montant = parseFloat(document.getElementById('inputMontant').value);
-  if (!montant || montant <= 0) { showToast('⚠️ Montant invalide'); return; }
-  if (!personneActive) return;
-
-  const tx = {
-    id: Date.now().toString(),
-    pid: personneActive.id,
-    type: typeActif,
-    montant,
-    note: document.getElementById('inputNote').value.trim(),
-    date: document.getElementById('inputDate').value || new Date().toISOString().split('T')[0]
-  };
-  transactions.push(tx);
-  sauver();
-  document.getElementById('overlayTransaction').classList.remove('open');
-  renderDetail();
-  showToast(typeActif === 'CREDIT' ? '📥 Transaction enregistrée' : '📤 Transaction enregistrée');
-}
-
-// ══════════════════════════════════════════
-// SUPPRESSION 
-// ══════════════════════════════════════════
-function confirmerSuppressionTx(tid) {
-  const tx = transactions.find(t => t.id === tid);
-  if (!tx) return;
-  document.getElementById('confirmTitle').textContent = 'Supprimer la transaction';
-  document.getElementById('confirmMsg').textContent = 'Cette transaction sera définitivement supprimée.';
-  confirmCallback = () => {
-    transactions = transactions.filter(t => t.id !== tid);
-    sauver();
-    setTimeout(() => renderDetail(), 50);
-    showToast('Transaction supprimée');
-  };
-  document.getElementById('confirmOverlay').classList.add('open');
-}
-
-function confirmerSuppressionPersonne() {
-  if (!personneActive) return;
-  const nbTx = transactions.filter(t => t.pid === personneActive.id).length;
-  document.getElementById('confirmTitle').textContent = 'Supprimer ' + personneActive.nom;
-  document.getElementById('confirmMsg').textContent = `Toutes les données de ${personneActive.nom} seront supprimées (${nbTx} transaction${nbTx !== 1 ? 's' : ''}).`;
-  confirmCallback = () => {
-    transactions = transactions.filter(t => t.pid !== personneActive.id);
-    personnes = personnes.filter(p => p.id !== personneActive.id);
-    sauver();
-    fermerDetail();
-    showToast('🗑 ' + personneActive.nom + ' supprimé(e)');
-  };
-  document.getElementById('confirmOverlay').classList.add('open');
-}
-
-function fermerConfirm() {
-  document.getElementById('confirmOverlay').classList.remove('open');
-  confirmCallback = null;
-}
-
-document.getElementById('confirmOk').onclick = () => {
-  fermerConfirm();
-  if (confirmCallback) confirmCallback();
-};
-
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-renderListe();
-  // Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/mes-comptes/sw.js');
-}
+    // Init
+    renderListe();
 </script>
+
 </body>
 </html>
+    
