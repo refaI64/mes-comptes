@@ -55,7 +55,8 @@
         .tab { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; border-radius: 7px; }
         .tab.active { background: var(--surface3); color: var(--text); font-weight: 600; }
 
-        .personne-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin: 0 16px 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+        .personne-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin: 0 16px 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; }
+        .personne-card:hover { background: var(--surface2); }
         .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; }
         .avatar.green { background: rgba(0,229,160,0.1); color: var(--accent-green); }
         .avatar.red { background: rgba(255,77,109,0.1); color: var(--accent-red); }
@@ -78,19 +79,22 @@
         .type-btn.active-red { border-color: var(--accent-red); color: var(--accent-red); background: rgba(255,77,109,0.05); }
 
         .btn-primary { width: 100%; padding: 15px; border-radius: var(--radius-sm); border: none; background: var(--accent-blue); color: white; font-weight: 700; cursor: pointer; }
-        .btn-add-top { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-blue); border: none; color: white; font-size: 20px; }
+        .btn-add-top { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-blue); border: none; color: white; font-size: 20px; cursor: pointer; }
 
         /* Detail Page */
-        .page-detail { position: fixed; inset: 0; z-index: 150; background: var(--bg); display: none; flex-direction: column; }
-        .page-detail.open { display: flex; overflow-y: auto; }
+        .page-detail { position: fixed; inset: 0; z-index: 150; background: var(--bg); display: none; flex-direction: column; overflow-y: auto; }
+        .page-detail.open { display: flex; }
         .tx-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); }
-        .tx-del-btn { background: none; border: none; color: var(--accent-red); padding: 5px; cursor: pointer; font-size: 16px; opacity: 0.6; }
+        .tx-del-btn { background: none; border: none; color: var(--accent-red); padding: 5px; cursor: pointer; font-size: 16px; opacity: 0.6; transition: opacity 0.2s; }
+        .tx-del-btn:hover { opacity: 1; }
         .tx-info { flex: 1; cursor: pointer; }
         .tx-note { font-weight: 500; font-size: 14px; }
         .tx-date { font-size: 11px; color: var(--text-muted); }
         .tx-montant { font-family: 'Syne', sans-serif; font-weight: 700; margin-right: 15px; }
 
-        .btn-danger { width: 90%; margin: 20px auto; padding: 12px; background: rgba(255,77,109,0.1); color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: var(--radius-sm); }
+        .btn-danger { width: 90%; margin: 20px auto; padding: 12px; background: rgba(255,77,109,0.1); color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: var(--radius-sm); cursor: pointer; }
+        
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -130,7 +134,7 @@
 <div class="page-detail" id="pageDetail">
     <div class="header">
         <div class="header-top">
-            <button onclick="fermerDetail()" style="background:none; border:none; color:white; font-size:20px;">←</button>
+            <button onclick="fermerDetail()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">←</button>
             <span class="app-title" id="detailNom">Nom</span>
             <button class="btn-add-top" onclick="openModalTransaction()">＋</button>
         </div>
@@ -186,7 +190,7 @@
     let personneActive = null;
     let typeActif = 'CREDIT';
     let tabActif = 'tous';
-    let editTxId = null; // Pour savoir si on modifie une transaction
+    let editTxId = null;
 
     function sauver() {
         localStorage.setItem('mc_personnes', JSON.stringify(personnes));
@@ -199,26 +203,53 @@
         const liste = document.getElementById('listePersonnes');
         let totalC = 0, totalD = 0;
 
-        liste.innerHTML = personnes.map(p => {
+        if (personnes.length === 0) {
+            liste.innerHTML = '<div class="empty-state">Aucune personne<br>Cliquez sur + pour ajouter</div>';
+            document.getElementById('bilanNet').textContent = formatDH(0);
+            document.getElementById('totalCredit').textContent = formatDH(0);
+            document.getElementById('totalDebit').textContent = formatDH(0);
+            return;
+        }
+
+        const personnesAvecSolde = personnes.map(p => {
             const txs = transactions.filter(t => t.pid === p.id);
             const solde = txs.reduce((acc, t) => acc + (t.type === 'CREDIT' ? t.montant : -t.montant), 0);
-            
-            if (solde > 0) totalC += solde; else totalD += Math.abs(solde);
-            
-            // Filtre des onglets
-            if (tabActif === 'credit' && solde <= 0) return '';
-            if (tabActif === 'debit' && solde >= 0) return '';
+            return { ...p, solde };
+        });
 
-            const cls = solde >= 0 ? 'green' : 'red';
-            return `
-                <div class="personne-card" onclick="ouvrirDetail('${p.id}')">
-                    <div class="avatar ${cls}">${p.nom[0].toUpperCase()}</div>
-                    <div class="personne-info"><strong>${p.nom}</strong></div>
-                    <div class="personne-solde" style="color:var(--accent-${cls})">${formatDH(Math.abs(solde))}</div>
-                </div>`;
-        }).join('');
+        // Filtrer selon l'onglet actif
+        let personnesFiltrees = personnesAvecSolde;
+        if (tabActif === 'credit') {
+            personnesFiltrees = personnesAvecSolde.filter(p => p.solde > 0);
+        } else if (tabActif === 'debit') {
+            personnesFiltrees = personnesAvecSolde.filter(p => p.solde < 0);
+        }
 
-        document.getElementById('bilanNet').textContent = formatDH(totalC - totalD);
+        if (personnesFiltrees.length === 0) {
+            liste.innerHTML = '<div class="empty-state">Aucune personne dans cette catégorie</div>';
+        } else {
+            liste.innerHTML = personnesFiltrees.map(p => {
+                const cls = p.solde >= 0 ? 'green' : 'red';
+                return `
+                    <div class="personne-card" onclick="ouvrirDetail('${p.id}')">
+                        <div class="avatar ${cls}">${p.nom[0].toUpperCase()}</div>
+                        <div class="personne-info"><strong>${escapeHtml(p.nom)}</strong></div>
+                        <div class="personne-solde" style="color:var(--accent-${cls})">${formatDH(Math.abs(p.solde))}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        // Calculer totaux sur toutes les personnes (non filtrées)
+        personnesAvecSolde.forEach(p => {
+            if (p.solde > 0) totalC += p.solde;
+            else totalD += Math.abs(p.solde);
+        });
+
+        const bilanNet = totalC - totalD;
+        const bilanNetElement = document.getElementById('bilanNet');
+        bilanNetElement.textContent = formatDH(Math.abs(bilanNet));
+        bilanNetElement.className = 'bilan-net ' + (bilanNet >= 0 ? 'positif' : 'negatif');
+        
         document.getElementById('totalCredit').textContent = formatDH(totalC);
         document.getElementById('totalDebit').textContent = formatDH(totalD);
     }
@@ -226,59 +257,85 @@
     function setTab(t) {
         tabActif = t;
         document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
+        if (t === 'tous') document.getElementById('tabTous').classList.add('active');
+        else if (t === 'credit') document.getElementById('tabCredit').classList.add('active');
+        else if (t === 'debit') document.getElementById('tabDebit').classList.add('active');
         renderListe();
     }
 
     // GESTION PERSONNES
-    function openModalPersonne() { document.getElementById('overlayPersonne').classList.add('open'); }
+    function openModalPersonne() { 
+        document.getElementById('inputNom').value = '';
+        document.getElementById('overlayPersonne').classList.add('open'); 
+    }
+    
     function sauvegarderPersonne() {
         const nom = document.getElementById('inputNom').value.trim();
         if(!nom) return;
         personnes.push({ id: Date.now().toString(), nom });
-        sauver(); closeModals(); renderListe();
+        sauver(); 
+        closeModals(); 
+        renderListe();
     }
+    
     function supprimerPersonne() {
-        if(confirm("Supprimer cette personne et tout son historique ?")) {
+        if(confirm(`Supprimer "${personneActive.nom}" et toutes ses transactions ?`)) {
             transactions = transactions.filter(t => t.pid !== personneActive.id);
             personnes = personnes.filter(p => p.id !== personneActive.id);
-            sauver(); fermerDetail();
+            sauver(); 
+            fermerDetail();
+            renderListe();
         }
     }
 
     // GESTION DÉTAILS & TRANSACTIONS
     function ouvrirDetail(id) {
         personneActive = personnes.find(p => p.id === id);
+        if (!personneActive) return;
         document.getElementById('pageDetail').classList.add('open');
         renderDetail();
     }
-    function fermerDetail() { document.getElementById('pageDetail').classList.remove('open'); renderListe(); }
+    
+    function fermerDetail() { 
+        document.getElementById('pageDetail').classList.remove('open'); 
+        personneActive = null;
+        renderListe();
+    }
 
     function renderDetail() {
+        if (!personneActive) return;
+        
         document.getElementById('detailNom').textContent = personneActive.nom;
         const txs = transactions.filter(t => t.pid === personneActive.id).sort((a,b) => new Date(b.date) - new Date(a.date));
         const solde = txs.reduce((acc, t) => acc + (t.type === 'CREDIT' ? t.montant : -t.montant), 0);
         
-        document.getElementById('detailMontant').textContent = formatDH(Math.abs(solde));
-        document.getElementById('detailMontant').style.color = solde >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+        const detailMontantElement = document.getElementById('detailMontant');
+        detailMontantElement.textContent = formatDH(Math.abs(solde));
+        detailMontantElement.style.color = solde >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 
-        document.getElementById('txList').innerHTML = txs.map(t => `
-            <div class="tx-item">
-                <div class="tx-info" onclick="editerTx('${t.id}')">
-                    <div class="tx-note">${t.note || 'Opération'}</div>
-                    <div class="tx-date">${t.date}</div>
-                </div>
-                <div class="tx-montant ${t.type === 'CREDIT' ? 'green' : 'red'}" style="color:var(--accent-${t.type === 'CREDIT' ? 'green' : 'red'})">
-                    ${t.type === 'CREDIT' ? '+' : '-'}${t.montant}
-                </div>
-                <button class="tx-del-btn" onclick="supprimerTx('${t.id}')">🗑</button>
-            </div>`).join('');
+        if (txs.length === 0) {
+            document.getElementById('txList').innerHTML = '<div class="empty-state">Aucune transaction<br>Cliquez sur + pour ajouter</div>';
+        } else {
+            document.getElementById('txList').innerHTML = txs.map(t => `
+                <div class="tx-item">
+                    <div class="tx-info" onclick="editerTx('${t.id}')">
+                        <div class="tx-note">${escapeHtml(t.note || 'Opération')}</div>
+                        <div class="tx-date">${t.date}</div>
+                    </div>
+                    <div class="tx-montant" style="color:var(--accent-${t.type === 'CREDIT' ? 'green' : 'red'})">
+                        ${t.type === 'CREDIT' ? '+' : '-'}${t.montant.toFixed(2)} DH
+                    </div>
+                    <button class="tx-del-btn" onclick="event.stopPropagation(); supprimerTx('${t.id}')">🗑</button>
+                </div>`).join('');
+        }
     }
 
     function setType(t) {
         typeActif = t;
-        document.getElementById('btnCredit').className = 'type-btn' + (t === 'CREDIT' ? ' active-green' : '');
-        document.getElementById('btnDebit').className = 'type-btn' + (t === 'DEBIT' ? ' active-red' : '');
+        const btnCredit = document.getElementById('btnCredit');
+        const btnDebit = document.getElementById('btnDebit');
+        btnCredit.className = 'type-btn' + (t === 'CREDIT' ? ' active-green' : '');
+        btnDebit.className = 'type-btn' + (t === 'DEBIT' ? ' active-red' : '');
     }
 
     function openModalTransaction() {
@@ -292,9 +349,10 @@
 
     function editerTx(id) {
         const t = transactions.find(tx => tx.id === id);
+        if (!t) return;
         editTxId = id;
         document.getElementById('inputMontant').value = t.montant;
-        document.getElementById('inputNote').value = t.note;
+        document.getElementById('inputNote').value = t.note || '';
         document.getElementById('inputDate').value = t.date;
         setType(t.type);
         document.getElementById('overlayTransaction').classList.add('open');
@@ -304,27 +362,71 @@
         const montant = parseFloat(document.getElementById('inputMontant').value);
         const note = document.getElementById('inputNote').value;
         const date = document.getElementById('inputDate').value;
-        if(!montant) return;
-
-        if(editTxId) {
-            const index = transactions.findIndex(t => t.id === editTxId);
-            transactions[index] = { ...transactions[index], montant, note, date, type: typeActif };
-        } else {
-            transactions.push({ id: Date.now().toString(), pid: personneActive.id, montant, note, date, type: typeActif });
+        
+        if(!montant || isNaN(montant) || montant <= 0) {
+            alert("Veuillez entrer un montant valide");
+            return;
         }
         
-        sauver(); closeModals(); renderDetail();
+        if(!date) {
+            alert("Veuillez sélectionner une date");
+            return;
+        }
+
+        if(editTxId) {
+            // Modification
+            const index = transactions.findIndex(t => t.id === editTxId);
+            if (index !== -1) {
+                transactions[index] = { 
+                    ...transactions[index], 
+                    montant, 
+                    note, 
+                    date, 
+                    type: typeActif 
+                };
+            }
+        } else {
+            // Nouvelle transaction
+            transactions.push({ 
+                id: Date.now().toString(), 
+                pid: personneActive.id, 
+                montant, 
+                note, 
+                date, 
+                type: typeActif 
+            });
+        }
+        
+        sauver(); 
+        closeModals(); 
+        renderDetail();
+        renderListe(); // Mettre à jour la liste principale
     }
 
     function supprimerTx(id) {
         if(confirm("Supprimer cette opération ?")) {
             transactions = transactions.filter(t => t.id !== id);
-            sauver(); renderDetail();
+            sauver(); 
+            renderDetail();
+            renderListe(); // Mettre à jour la liste principale
         }
     }
 
     function closeModals() {
         document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+        editTxId = null;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
     }
 
     // Init
@@ -333,4 +435,3 @@
 
 </body>
 </html>
-    
