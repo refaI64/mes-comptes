@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1a1a2e">
     <title>Mes Comptes</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    
     <style>
         :root {
             --bg: #0f0f1a;
@@ -23,78 +21,78 @@
             --radius: 16px;
             --radius-sm: 10px;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); max-width: 480px; margin: 0 auto; min-height: 100vh; }
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-
-        /* Header & Bilan */
         .header { position: sticky; top: 0; z-index: 100; background: rgba(15,15,26,0.92); backdrop-filter: blur(20px); padding: 16px 20px; border-bottom: 1px solid var(--border); }
-        .header-top { display: flex; align-items: center; justify-content: space-between; }
+        .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .app-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; }
-        
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+
         .bilan-card { margin: 16px; padding: 20px; background: linear-gradient(135deg, #1e1e35 0%, #252540 100%); border-radius: var(--radius); border: 1px solid var(--border); }
         .bilan-net { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; margin: 5px 0 15px; }
         .bilan-net.positif { color: var(--accent-green); }
         .bilan-net.negatif { color: var(--accent-red); }
-        
         .bilan-row { display: flex; gap: 10px; }
         .bilan-item { flex: 1; }
         .bilan-item-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
         .bilan-item-val { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
 
-        /* Tabs & Liste */
         .tabs { display: flex; margin: 0 16px 10px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; }
         .tab { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; border-radius: 7px; }
         .tab.active { background: var(--surface3); color: var(--text); font-weight: 600; }
 
         .personne-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin: 0 16px 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; }
         .personne-card:hover { background: var(--surface2); }
-        .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; }
+        .avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; flex-shrink: 0; }
         .avatar.green { background: rgba(0,229,160,0.1); color: var(--accent-green); }
         .avatar.red { background: rgba(255,77,109,0.1); color: var(--accent-red); }
         .personne-info { flex: 1; }
         .personne-solde { text-align: right; font-family: 'Syne', sans-serif; font-weight: 700; }
 
-        /* Modals & Forms */
         .overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; }
         .overlay.open { display: flex; }
-        .modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 20px; width: 100%; animation: slideUp 0.3s ease-out; }
+        .modal { background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 20px; width: 100%; animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
+        .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
         .form-group { margin-bottom: 15px; }
-        .form-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
-        .form-input, .form-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; color: #fff; font-family: inherit; }
-        
+        .form-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; color: #fff; font-family: inherit; font-size: 15px; }
+        .form-input:focus { outline: none; border-color: var(--accent-blue); }
+
         .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .type-btn { padding: 12px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: transparent; color: var(--text-muted); font-weight: 700; cursor: pointer; }
+        .type-btn { padding: 12px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: transparent; color: var(--text-muted); font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.2s; }
         .type-btn.active-green { border-color: var(--accent-green); color: var(--accent-green); background: rgba(0,229,160,0.05); }
         .type-btn.active-red { border-color: var(--accent-red); color: var(--accent-red); background: rgba(255,77,109,0.05); }
 
-        .btn-primary { width: 100%; padding: 15px; border-radius: var(--radius-sm); border: none; background: var(--accent-blue); color: white; font-weight: 700; cursor: pointer; }
-        .btn-add-top { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-blue); border: none; color: white; font-size: 20px; cursor: pointer; }
+        .btn-primary { width: 100%; padding: 15px; border-radius: var(--radius-sm); border: none; background: var(--accent-blue); color: white; font-weight: 700; cursor: pointer; font-size: 15px; margin-top: 5px; }
+        .btn-add-top { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-blue); border: none; color: white; font-size: 20px; cursor: pointer; flex-shrink: 0; }
+        .btn-icon { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-icon:hover { background: var(--surface3); color: var(--text); }
 
-        /* Detail Page */
         .page-detail { position: fixed; inset: 0; z-index: 150; background: var(--bg); display: none; flex-direction: column; overflow-y: auto; }
         .page-detail.open { display: flex; }
-        .tx-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); }
-        .tx-del-btn { background: none; border: none; color: var(--accent-red); padding: 5px; cursor: pointer; font-size: 16px; opacity: 0.6; transition: opacity 0.2s; }
-        .tx-del-btn:hover { opacity: 1; }
-        .tx-info { flex: 1; cursor: pointer; }
-        .tx-note { font-weight: 500; font-size: 14px; }
-        .tx-date { font-size: 11px; color: var(--text-muted); }
-        .tx-montant { font-family: 'Syne', sans-serif; font-weight: 700; margin-right: 15px; }
 
-        .btn-danger { width: 90%; margin: 20px auto; padding: 12px; background: rgba(255,77,109,0.1); color: var(--accent-red); border: 1px solid var(--accent-red); border-radius: var(--radius-sm); cursor: pointer; }
-        
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .tx-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); gap: 10px; }
+        .tx-info { flex: 1; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .tx-info:hover { background: var(--surface2); }
+        .tx-note { font-weight: 500; font-size: 14px; }
+        .tx-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .tx-montant { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+        .tx-del-btn { background: none; border: none; color: var(--accent-red); padding: 5px 8px; cursor: pointer; font-size: 16px; opacity: 0.5; transition: opacity 0.2s; }
+        .tx-del-btn:hover { opacity: 1; }
+        .tx-edit-hint { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+        .btn-danger { display: block; width: calc(100% - 32px); margin: 20px 16px; padding: 12px; background: rgba(255,77,109,0.1); color: var(--accent-red); border: 1px solid rgba(255,77,109,0.3); border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; font-weight: 600; }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); line-height: 1.8; }
+
+        .detail-solde-zone { text-align: center; padding: 20px; background: var(--surface); margin: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+        .section-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .solde-big { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; }
+
+        .tx-list-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px 6px; }
+        .tx-list-header span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -131,26 +129,38 @@
     <div id="listePersonnes"></div>
 </div>
 
+<!-- PAGE DÉTAIL -->
 <div class="page-detail" id="pageDetail">
     <div class="header">
         <div class="header-top">
-            <button onclick="fermerDetail()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">←</button>
-            <span class="app-title" id="detailNom">Nom</span>
-            <button class="btn-add-top" onclick="openModalTransaction()">＋</button>
+            <button onclick="fermerDetail()" style="background:none; border:none; color:white; font-size:22px; cursor:pointer; padding:4px 8px;">←</button>
+            <span class="app-title" id="detailNom" style="flex:1; text-align:center;"></span>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="openModalModifierPersonne()" title="Modifier le nom">✏️</button>
+                <button class="btn-add-top" onclick="openModalTransaction()">＋</button>
+            </div>
         </div>
     </div>
-    
-    <div style="text-align:center; padding: 20px;">
-        <div class="bilan-item-label">Solde avec cette personne</div>
-        <div class="bilan-net" id="detailMontant">0,00 DH</div>
+
+    <div class="detail-solde-zone">
+        <div class="section-label">Solde avec cette personne</div>
+        <div class="solde-big" id="detailMontant">0,00 DH</div>
+        <div id="detailSoldeLabel" style="font-size:12px; margin-top:6px; color: var(--text-muted);"></div>
+    </div>
+
+    <div class="tx-list-header">
+        <span>Transactions</span>
+        <span id="txCount"></span>
     </div>
 
     <div id="txList"></div>
-    <button class="btn-danger" onclick="supprimerPersonne()">Supprimer cette personne</button>
+    <button class="btn-danger" onclick="supprimerPersonne()">🗑 Supprimer cette personne</button>
 </div>
 
+<!-- MODAL TRANSACTION (ajout + modification) -->
 <div class="overlay" id="overlayTransaction" onclick="if(event.target==this) closeModals()">
     <div class="modal">
+        <div class="modal-title" id="modalTxTitre">Nouvelle transaction</div>
         <div class="form-group">
             <label class="form-label">Type d'opération</label>
             <div class="type-toggle">
@@ -160,7 +170,7 @@
         </div>
         <div class="form-group">
             <label class="form-label">Montant (DH)</label>
-            <input type="number" class="form-input" id="inputMontant" placeholder="0.00">
+            <input type="number" class="form-input" id="inputMontant" placeholder="0.00" step="0.01">
         </div>
         <div class="form-group">
             <label class="form-label">Note / Raison</label>
@@ -170,17 +180,31 @@
             <label class="form-label">Date</label>
             <input type="date" class="form-input" id="inputDate">
         </div>
-        <button class="btn-primary" onclick="sauvegarderTransaction()">Enregistrer</button>
+        <button class="btn-primary" onclick="sauvegarderTransaction()">✓ Enregistrer</button>
     </div>
 </div>
 
+<!-- MODAL AJOUTER PERSONNE -->
 <div class="overlay" id="overlayPersonne" onclick="if(event.target==this) closeModals()">
     <div class="modal">
+        <div class="modal-title">Nouvelle personne</div>
         <div class="form-group">
-            <label class="form-label">Nom de la personne</label>
-            <input type="text" class="form-input" id="inputNom" placeholder="Nom">
+            <label class="form-label">Nom</label>
+            <input type="text" class="form-input" id="inputNom" placeholder="Nom de la personne">
         </div>
-        <button class="btn-primary" onclick="sauvegarderPersonne()">Ajouter</button>
+        <button class="btn-primary" onclick="sauvegarderPersonne()">✓ Ajouter</button>
+    </div>
+</div>
+
+<!-- MODAL MODIFIER PERSONNE -->
+<div class="overlay" id="overlayModifierPersonne" onclick="if(event.target==this) closeModals()">
+    <div class="modal">
+        <div class="modal-title">Modifier le client</div>
+        <div class="form-group">
+            <label class="form-label">Nom</label>
+            <input type="text" class="form-input" id="inputNomModif" placeholder="Nouveau nom">
+        </div>
+        <button class="btn-primary" onclick="sauvegarderModifPersonne()">✓ Enregistrer</button>
     </div>
 </div>
 
@@ -197,14 +221,22 @@
         localStorage.setItem('mc_transactions', JSON.stringify(transactions));
     }
 
-    function formatDH(n) { return n.toLocaleString('fr-MA', { minimumFractionDigits: 2 }) + ' DH'; }
+    function formatDH(n) {
+        return n.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' DH';
+    }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    /* ── LISTE PRINCIPALE ── */
     function renderListe() {
         const liste = document.getElementById('listePersonnes');
         let totalC = 0, totalD = 0;
 
         if (personnes.length === 0) {
-            liste.innerHTML = '<div class="empty-state">Aucune personne<br>Cliquez sur + pour ajouter</div>';
+            liste.innerHTML = '<div class="empty-state">Aucune personne<br>Appuyez sur <strong>+</strong> pour ajouter</div>';
             document.getElementById('bilanNet').textContent = formatDH(0);
             document.getElementById('totalCredit').textContent = formatDH(0);
             document.getElementById('totalDebit').textContent = formatDH(0);
@@ -217,39 +249,33 @@
             return { ...p, solde };
         });
 
-        // Filtrer selon l'onglet actif
-        let personnesFiltrees = personnesAvecSolde;
-        if (tabActif === 'credit') {
-            personnesFiltrees = personnesAvecSolde.filter(p => p.solde > 0);
-        } else if (tabActif === 'debit') {
-            personnesFiltrees = personnesAvecSolde.filter(p => p.solde < 0);
-        }
+        let filtrees = personnesAvecSolde;
+        if (tabActif === 'credit') filtrees = personnesAvecSolde.filter(p => p.solde > 0);
+        else if (tabActif === 'debit') filtrees = personnesAvecSolde.filter(p => p.solde < 0);
 
-        if (personnesFiltrees.length === 0) {
-            liste.innerHTML = '<div class="empty-state">Aucune personne dans cette catégorie</div>';
-        } else {
-            liste.innerHTML = personnesFiltrees.map(p => {
+        liste.innerHTML = filtrees.length === 0
+            ? '<div class="empty-state">Aucune personne dans cette catégorie</div>'
+            : filtrees.map(p => {
                 const cls = p.solde >= 0 ? 'green' : 'red';
-                return `
-                    <div class="personne-card" onclick="ouvrirDetail('${p.id}')">
-                        <div class="avatar ${cls}">${p.nom[0].toUpperCase()}</div>
-                        <div class="personne-info"><strong>${escapeHtml(p.nom)}</strong></div>
-                        <div class="personne-solde" style="color:var(--accent-${cls})">${formatDH(Math.abs(p.solde))}</div>
-                    </div>`;
+                return `<div class="personne-card" onclick="ouvrirDetail('${p.id}')">
+                    <div class="avatar ${cls}">${escapeHtml(p.nom[0].toUpperCase())}</div>
+                    <div class="personne-info">
+                        <strong>${escapeHtml(p.nom)}</strong>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${p.solde >= 0 ? 'Me doit' : 'Je dois'}</div>
+                    </div>
+                    <div class="personne-solde" style="color:var(--accent-${cls})">${formatDH(Math.abs(p.solde))}</div>
+                </div>`;
             }).join('');
-        }
 
-        // Calculer totaux sur toutes les personnes (non filtrées)
         personnesAvecSolde.forEach(p => {
             if (p.solde > 0) totalC += p.solde;
             else totalD += Math.abs(p.solde);
         });
 
-        const bilanNet = totalC - totalD;
-        const bilanNetElement = document.getElementById('bilanNet');
-        bilanNetElement.textContent = formatDH(Math.abs(bilanNet));
-        bilanNetElement.className = 'bilan-net ' + (bilanNet >= 0 ? 'positif' : 'negatif');
-        
+        const net = totalC - totalD;
+        const el = document.getElementById('bilanNet');
+        el.textContent = formatDH(Math.abs(net));
+        el.className = 'bilan-net ' + (net >= 0 ? 'positif' : 'negatif');
         document.getElementById('totalCredit').textContent = formatDH(totalC);
         document.getElementById('totalDebit').textContent = formatDH(totalD);
     }
@@ -257,100 +283,135 @@
     function setTab(t) {
         tabActif = t;
         document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-        if (t === 'tous') document.getElementById('tabTous').classList.add('active');
-        else if (t === 'credit') document.getElementById('tabCredit').classList.add('active');
-        else if (t === 'debit') document.getElementById('tabDebit').classList.add('active');
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
         renderListe();
     }
 
-    // GESTION PERSONNES
-    function openModalPersonne() { 
+    /* ── PERSONNES ── */
+    function openModalPersonne() {
         document.getElementById('inputNom').value = '';
-        document.getElementById('overlayPersonne').classList.add('open'); 
+        document.getElementById('overlayPersonne').classList.add('open');
+        setTimeout(() => document.getElementById('inputNom').focus(), 300);
     }
-    
+
     function sauvegarderPersonne() {
         const nom = document.getElementById('inputNom').value.trim();
-        if(!nom) return;
+        if (!nom) return;
         personnes.push({ id: Date.now().toString(), nom });
-        sauver(); 
-        closeModals(); 
+        sauver(); closeModals(); renderListe();
+    }
+
+    /* ── MODIFIER NOM PERSONNE ── */
+    function openModalModifierPersonne() {
+        if (!personneActive) return;
+        document.getElementById('inputNomModif').value = personneActive.nom;
+        document.getElementById('overlayModifierPersonne').classList.add('open');
+        setTimeout(() => document.getElementById('inputNomModif').focus(), 300);
+    }
+
+    function sauvegarderModifPersonne() {
+        const nom = document.getElementById('inputNomModif').value.trim();
+        if (!nom) return;
+        const idx = personnes.findIndex(p => p.id === personneActive.id);
+        if (idx !== -1) {
+            personnes[idx].nom = nom;
+            personneActive = personnes[idx];
+        }
+        sauver(); closeModals();
+        document.getElementById('detailNom').textContent = nom;
         renderListe();
     }
-    
+
     function supprimerPersonne() {
-        if(confirm(`Supprimer "${personneActive.nom}" et toutes ses transactions ?`)) {
+        if (confirm(`Supprimer "${personneActive.nom}" et toutes ses transactions ?`)) {
             transactions = transactions.filter(t => t.pid !== personneActive.id);
             personnes = personnes.filter(p => p.id !== personneActive.id);
-            sauver(); 
-            fermerDetail();
-            renderListe();
+            sauver(); fermerDetail(); renderListe();
         }
     }
 
-    // GESTION DÉTAILS & TRANSACTIONS
+    /* ── DÉTAIL PERSONNE ── */
     function ouvrirDetail(id) {
         personneActive = personnes.find(p => p.id === id);
         if (!personneActive) return;
         document.getElementById('pageDetail').classList.add('open');
         renderDetail();
     }
-    
-    function fermerDetail() { 
-        document.getElementById('pageDetail').classList.remove('open'); 
+
+    function fermerDetail() {
+        document.getElementById('pageDetail').classList.remove('open');
         personneActive = null;
         renderListe();
     }
 
     function renderDetail() {
         if (!personneActive) return;
-        
         document.getElementById('detailNom').textContent = personneActive.nom;
-        const txs = transactions.filter(t => t.pid === personneActive.id).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        const txs = transactions
+            .filter(t => t.pid === personneActive.id)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
         const solde = txs.reduce((acc, t) => acc + (t.type === 'CREDIT' ? t.montant : -t.montant), 0);
-        
-        const detailMontantElement = document.getElementById('detailMontant');
-        detailMontantElement.textContent = formatDH(Math.abs(solde));
-        detailMontantElement.style.color = solde >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        const el = document.getElementById('detailMontant');
+        el.textContent = formatDH(Math.abs(solde));
+        el.style.color = solde >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        document.getElementById('detailSoldeLabel').textContent =
+            solde > 0 ? `${personneActive.nom} vous doit` :
+            solde < 0 ? `Vous devez à ${personneActive.nom}` : 'Soldé';
+
+        document.getElementById('txCount').textContent = txs.length + ' opération' + (txs.length > 1 ? 's' : '');
 
         if (txs.length === 0) {
-            document.getElementById('txList').innerHTML = '<div class="empty-state">Aucune transaction<br>Cliquez sur + pour ajouter</div>';
-        } else {
-            document.getElementById('txList').innerHTML = txs.map(t => `
-                <div class="tx-item">
-                    <div class="tx-info" onclick="editerTx('${t.id}')">
-                        <div class="tx-note">${escapeHtml(t.note || 'Opération')}</div>
-                        <div class="tx-date">${t.date}</div>
-                    </div>
-                    <div class="tx-montant" style="color:var(--accent-${t.type === 'CREDIT' ? 'green' : 'red'})">
-                        ${t.type === 'CREDIT' ? '+' : '-'}${t.montant.toFixed(2)} DH
-                    </div>
-                    <button class="tx-del-btn" onclick="event.stopPropagation(); supprimerTx('${t.id}')">🗑</button>
-                </div>`).join('');
+            document.getElementById('txList').innerHTML = '<div class="empty-state">Aucune transaction<br>Appuyez sur <strong>+</strong> pour ajouter</div>';
+            return;
         }
+
+        document.getElementById('txList').innerHTML = txs.map(t => `
+            <div class="tx-item">
+                <div class="tx-info" onclick="editerTx('${t.id}')">
+                    <div class="tx-note">${escapeHtml(t.note || 'Opération')}</div>
+                    <div class="tx-date">${formatDate(t.date)}</div>
+                    <div class="tx-edit-hint">Appuyer pour modifier</div>
+                </div>
+                <div class="tx-montant" style="color:var(--accent-${t.type === 'CREDIT' ? 'green' : 'red'})">
+                    ${t.type === 'CREDIT' ? '+' : '−'}${formatDH(t.montant)}
+                </div>
+                <button class="tx-del-btn" onclick="event.stopPropagation(); supprimerTx('${t.id}')">🗑</button>
+            </div>`).join('');
     }
 
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('fr-MA', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    /* ── TRANSACTIONS ── */
     function setType(t) {
         typeActif = t;
-        const btnCredit = document.getElementById('btnCredit');
-        const btnDebit = document.getElementById('btnDebit');
-        btnCredit.className = 'type-btn' + (t === 'CREDIT' ? ' active-green' : '');
-        btnDebit.className = 'type-btn' + (t === 'DEBIT' ? ' active-red' : '');
+        document.getElementById('btnCredit').className = 'type-btn' + (t === 'CREDIT' ? ' active-green' : '');
+        document.getElementById('btnDebit').className = 'type-btn' + (t === 'DEBIT' ? ' active-red' : '');
     }
 
     function openModalTransaction() {
         editTxId = null;
+        document.getElementById('modalTxTitre').textContent = 'Nouvelle transaction';
         document.getElementById('inputMontant').value = '';
         document.getElementById('inputNote').value = '';
         document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
         setType('CREDIT');
         document.getElementById('overlayTransaction').classList.add('open');
+        setTimeout(() => document.getElementById('inputMontant').focus(), 300);
     }
 
     function editerTx(id) {
         const t = transactions.find(tx => tx.id === id);
         if (!t) return;
         editTxId = id;
+        document.getElementById('modalTxTitre').textContent = 'Modifier la transaction';
         document.getElementById('inputMontant').value = t.montant;
         document.getElementById('inputNote').value = t.note || '';
         document.getElementById('inputDate').value = t.date;
@@ -360,55 +421,39 @@
 
     function sauvegarderTransaction() {
         const montant = parseFloat(document.getElementById('inputMontant').value);
-        const note = document.getElementById('inputNote').value;
+        const note = document.getElementById('inputNote').value.trim();
         const date = document.getElementById('inputDate').value;
-        
-        if(!montant || isNaN(montant) || montant <= 0) {
-            alert("Veuillez entrer un montant valide");
+
+        if (!montant || isNaN(montant) || montant <= 0) {
+            alert('Veuillez entrer un montant valide');
             return;
         }
-        
-        if(!date) {
-            alert("Veuillez sélectionner une date");
+        if (!date) {
+            alert('Veuillez sélectionner une date');
             return;
         }
 
-        if(editTxId) {
-            // Modification
-            const index = transactions.findIndex(t => t.id === editTxId);
-            if (index !== -1) {
-                transactions[index] = { 
-                    ...transactions[index], 
-                    montant, 
-                    note, 
-                    date, 
-                    type: typeActif 
-                };
+        if (editTxId) {
+            const idx = transactions.findIndex(t => t.id === editTxId);
+            if (idx !== -1) {
+                transactions[idx] = { ...transactions[idx], montant, note, date, type: typeActif };
             }
         } else {
-            // Nouvelle transaction
-            transactions.push({ 
-                id: Date.now().toString(), 
-                pid: personneActive.id, 
-                montant, 
-                note, 
-                date, 
-                type: typeActif 
+            transactions.push({
+                id: Date.now().toString(),
+                pid: personneActive.id,
+                montant, note, date,
+                type: typeActif
             });
         }
-        
-        sauver(); 
-        closeModals(); 
-        renderDetail();
-        renderListe(); // Mettre à jour la liste principale
+
+        sauver(); closeModals(); renderDetail(); renderListe();
     }
 
     function supprimerTx(id) {
-        if(confirm("Supprimer cette opération ?")) {
+        if (confirm('Supprimer cette opération ?')) {
             transactions = transactions.filter(t => t.id !== id);
-            sauver(); 
-            renderDetail();
-            renderListe(); // Mettre à jour la liste principale
+            sauver(); renderDetail(); renderListe();
         }
     }
 
@@ -417,21 +462,7 @@
         editTxId = null;
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
-        });
-    }
-
-    // Init
     renderListe();
 </script>
-
 </body>
 </html>
